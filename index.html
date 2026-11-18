@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>peaches</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+   <video src="/peaches.mp4" id="webrtc-cam" autoplay playsinline muted hidden loop></video>
+   
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/antiboredom/p5.riso/lib/p5.riso.js"></script>
+
+<script>
+    let yellowLayer, pinkLayer, blueLayer, greenLayer, blackLayer, frameBuffer, videoEl;
+
+    function setup() {
+      createCanvas(windowWidth- 100 , windowHeight - 100);
+      pixelDensity(1);
+      frameRate(8);
+
+      videoEl = document.getElementById('webrtc-cam');
+      initRiso();
+    }
+
+    function initRiso() {
+      Riso.channels = [];
+      yellowLayer = new Riso('yellow');
+      pinkLayer = new Riso('fluorescentpink');
+      blueLayer = new Riso('blue');
+    //   greenLayer = new Riso('green');
+      blackLayer = new Riso('black');
+      frameBuffer = createGraphics(width, height);
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth - 100, windowHeight - 100);
+      initRiso();
+    }
+
+    function draw() {
+      background(255, 255, 240);
+      clearRiso();
+
+      if (videoEl.readyState >= 2) {
+        frameBuffer.drawingContext.drawImage(videoEl, 0, 0, width, height);
+
+        const y = extractCMYKChannel(frameBuffer, 'yellow');
+        const m = extractCMYKChannel(frameBuffer, 'magenta');
+        const c = extractCMYKChannel(frameBuffer, 'cyan');
+        const k = extractCMYKChannel(frameBuffer, 'black');
+
+        yellowLayer.image(ditherImage(y, 'bayer'), 0, 0);
+        pinkLayer.image(ditherImage(m, 'bayer'), 0, 0);
+        // blueLayer.image(ditherImage(c, 'atkinson'), 0, 0);
+        // greenLayer.image(ditherImage(frameBuffer, 'bayer', 135), 0, 0);
+        blackLayer.image(ditherImage(k, 'atkinson'), 0, 0);
+        blackLayer.fill(150);
+        blackLayer.image(ditherImage(frameBuffer, 'none', 20), 0, 0);
+      }
+
+      textSize(40);
+      text('hiiiiiiiiiiiiiii', 50, 50);
+      drawRiso();
+    }
+  </script>
+</body>
+</html>
